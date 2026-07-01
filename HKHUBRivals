@@ -1,0 +1,139 @@
+-- Interface de Gamepass Paródia (RIVALESCO)
+-- LocalScript em StarterGui / StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Evita duplicação
+if PlayerGui:FindFirstChild("RIVALESCO_Interface") then
+	return
+end
+
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "RIVALESCO_Interface"
+gui.ResetOnSpawn = false
+gui.Parent = PlayerGui
+
+-- Frame principal
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0.5, 0, 0.6, 0)
+mainFrame.Position = UDim2.new(0.25, 0, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = gui
+
+-- Bordas arredondadas
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = mainFrame
+
+-- Aba Vantagens
+local tabVantagens = Instance.new("TextButton")
+tabVantagens.Text = "VANTAGENS"
+tabVantagens.Size = UDim2.new(0.5, 0, 0.1, 0)
+tabVantagens.Position = UDim2.new(0, 0, 0, 0)
+tabVantagens.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
+tabVantagens.TextColor3 = Color3.new(1,1,1)
+tabVantagens.Parent = mainFrame
+
+-- Aba Zoeiras
+local tabZoeiras = Instance.new("TextButton")
+tabZoeiras.Text = "ZOEIRAS"
+tabZoeiras.Size = UDim2.new(0.5, 0, 0.1, 0)
+tabZoeiras.Position = UDim2.new(0.5, 0, 0, 0)
+tabZoeiras.BackgroundColor3 = Color3.fromRGB(255, 150, 80)
+tabZoeiras.TextColor3 = Color3.new(1,1,1)
+tabZoeiras.Parent = mainFrame
+
+-- Frame Vantagens
+local vantagensFrame = Instance.new("Frame")
+vantagensFrame.Size = UDim2.new(1, 0, 0.9, 0)
+vantagensFrame.Position = UDim2.new(0, 0, 0.1, 0)
+vantagensFrame.BackgroundTransparency = 1
+vantagensFrame.Parent = mainFrame
+
+-- Frame Zoeiras
+local zoeirasFrame = Instance.new("Frame")
+zoeirasFrame.Size = UDim2.new(1, 0, 0.9, 0)
+zoeirasFrame.Position = UDim2.new(0, 0, 0.1, 0)
+zoeirasFrame.BackgroundTransparency = 1
+zoeirasFrame.Visible = false
+zoeirasFrame.Parent = mainFrame
+
+-- Layout automático
+local function criarLayout(frame)
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 8)
+	padding.PaddingLeft = UDim.new(0, 8)
+	padding.PaddingRight = UDim.new(0, 8)
+	padding.Parent = frame
+
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 8)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = frame
+end
+
+criarLayout(vantagensFrame)
+criarLayout(zoeirasFrame)
+
+-- Alternância de abas
+tabVantagens.MouseButton1Click:Connect(function()
+	vantagensFrame.Visible = true
+	zoeirasFrame.Visible = false
+end)
+
+tabZoeiras.MouseButton1Click:Connect(function()
+	vantagensFrame.Visible = false
+	zoeirasFrame.Visible = true
+end)
+
+-- Criador de botões
+local function criarBotao(frame, nome, descricao, cor)
+	local itemFrame = Instance.new("Frame")
+	itemFrame.Size = UDim2.new(1, -10, 0, 60)
+	itemFrame.BackgroundColor3 = cor
+	itemFrame.BorderSizePixel = 0
+	itemFrame.Parent = frame
+
+	local itemCorner = Instance.new("UICorner")
+	itemCorner.CornerRadius = UDim.new(0, 6)
+	itemCorner.Parent = itemFrame
+
+	local label = Instance.new("TextLabel")
+	label.Text = nome .. " - " .. descricao
+	label.Size = UDim2.new(0.7, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1,1,1)
+	label.TextScaled = true
+	label.Parent = itemFrame
+
+	local botao = Instance.new("TextButton")
+	botao.Text = "Ativar"
+	botao.Size = UDim2.new(0.2, 0, 0.7, 0)
+	botao.Position = UDim2.new(0.75, 0, 0.15, 0)
+	botao.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	botao.TextColor3 = Color3.fromRGB(0,0,0)
+	botao.Parent = itemFrame
+
+	local botaoCorner = Instance.new("UICorner")
+	botaoCorner.CornerRadius = UDim.new(0, 6)
+	botaoCorner.Parent = botao
+
+	botao.MouseButton1Click:Connect(function()
+		print(nome .. " ativado!")
+	end)
+end
+
+-- Vantagens
+criarBotao(vantagensFrame, "Radar do Zé Curioso", "Mostra inimigos próximos", Color3.fromRGB(80, 200, 120))
+criarBotao(vantagensFrame, "Auto-Tiro 3000", "Dispara automaticamente", Color3.fromRGB(80, 200, 120))
+
+-- Zoeiras
+criarBotao(zoeirasFrame, "Explosão de Memes", "Memes aparecem na tela", Color3.fromRGB(255, 150, 80))
+criarBotao(zoeirasFrame, "Chinelos Voadores", "Ataque com chinelos!", Color3.fromRGB(255, 150, 80))
+criarBotao(zoeirasFrame, "Modo Preguiçoso", "Movimento lento, mas estiloso", Color3.fromRGB(255, 150, 80))
+criarBotao(zoeirasFrame, "Interface Troll", "Mostra dados inúteis", Color3.fromRGB(255, 150, 80))
+criarBotao(zoeirasFrame, "Barra de Zoação", "Enche e explode em fogos", Color3.fromRGB(255, 150, 80))
