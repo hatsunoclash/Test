@@ -1,0 +1,227 @@
+--[[
+Sistema Avançado de Depuração e Análise de Gameplay para Roblox Studio
+Focado em testes, segurança e visualização
+
+Módulos:
+- InterfaceGui: Criação modular da interface organizada por abas
+- BoxESP: Visualização em tempo real de entidades (caixas)
+- HighlightChams: Realce visual de personagens e NPCs
+- Aimbot: Auxílio visual para testes de mira e segurança
+
+By ChatBox AI
+--]]
+
+-- Serviços Roblox
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local localPlayer = Players.LocalPlayer
+local mouse = localPlayer:GetMouse()
+
+-- Estrutura principal da aplicação para escalabilidade
+local DebugSystem = {}
+
+-- === Interface gráfica modular ===
+DebugSystem.InterfaceGui = {}
+
+function DebugSystem.InterfaceGui:Create()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "DebugSystemGUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
+
+    -- Janela principal
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 400, 0, 600)
+    mainFrame.Position = UDim2.new(0, 50, 0, 50)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    -- Título
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    title.TextColor3 = Color3.new(1,1,1)
+    title.Text = "Debug e Análise de Gameplay"
+    title.Font = Enum.Font.SourceSansSemibold
+    title.TextSize = 22
+    title.Parent = mainFrame
+
+    -- Abas (botões)
+    local tabs = Instance.new("Frame")
+    tabs.Size = UDim2.new(1, 0, 0, 40)
+    tabs.Position = UDim2.new(0, 0, 0, 40)
+    tabs.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    tabs.Parent = mainFrame
+
+    local tabNames = {"Box ESP", "Highlight", "Aimbot"}
+    local tabButtons = {}
+
+    for i, name in ipairs(tabNames) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1/#tabNames, -5, 1, -10)
+        btn.Position = UDim2.new((i-1)/#tabNames, 5, 0, 5)
+        btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        btn.TextColor3 = Color3.new(1,1,1)
+        btn.Text = name
+        btn.Font = Enum.Font.SourceSans
+        btn.TextSize = 18
+        btn.Parent = tabs
+        tabButtons[i] = btn
+    end
+
+    -- Conteúdo das abas
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -10, 1, -90)
+    contentFrame.Position = UDim2.new(0, 5, 0, 85)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    contentFrame.Parent = mainFrame
+
+    local pages = {}
+
+    -- Página Box ESP
+    local boxESPPage = Instance.new("Frame")
+    boxESPPage.Size = UDim2.new(1, 0, 1, 0)
+    boxESPPage.BackgroundTransparency = 1
+    boxESPPage.Parent = contentFrame
+
+    local boxESPEnabled = Instance.new("TextButton")
+    boxESPEnabled.Size = UDim2.new(0, 150, 0, 40)
+    boxESPEnabled.Position = UDim2.new(0, 10, 0, 10)
+    boxESPEnabled.Text = "Ativar Box ESP: OFF"
+    boxESPEnabled.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+    boxESPEnabled.TextColor3 = Color3.new(1, 1, 1)
+    boxESPEnabled.Parent = boxESPPage
+
+    pages["Box ESP"] = boxESPPage
+
+    -- Página Highlight
+    local highlightPage = Instance.new("Frame")
+    highlightPage.Size = UDim2.new(1, 0, 1, 0)
+    highlightPage.BackgroundTransparency = 1
+    highlightPage.Visible = false
+    highlightPage.Parent = contentFrame
+
+    local highlightEnabled = Instance.new("TextButton")
+    highlightEnabled.Size = UDim2.new(0, 150, 0, 40)
+    highlightEnabled.Position = UDim2.new(0, 10, 0, 10)
+    highlightEnabled.Text = "Ativar Highlight: OFF"
+    highlightEnabled.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+    highlightEnabled.TextColor3 = Color3.new(1,1,1)
+    highlightEnabled.Parent = highlightPage
+
+    pages["Highlight"] = highlightPage
+
+    -- Página Aimbot
+    local aimbotPage = Instance.new("Frame")
+    aimbotPage.Size = UDim2.new(1, 0, 1, 0)
+    aimbotPage.BackgroundTransparency = 1
+    aimbotPage.Visible = false
+    aimbotPage.Parent = contentFrame
+
+    local aimbotEnabled = Instance.new("TextButton")
+    aimbotEnabled.Size = UDim2.new(0, 150, 0, 40)
+    aimbotEnabled.Position = UDim2.new(0, 10, 0, 10)
+    aimbotEnabled.Text = "Ativar Aimbot: OFF"
+    aimbotEnabled.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+    aimbotEnabled.TextColor3 = Color3.new(1,1,1)
+    aimbotEnabled.Parent = aimbotPage
+
+    pages["Aimbot"] = aimbotPage
+
+    -- Controle de visibilidade das páginas ao clicar nas abas
+    for i, btn in ipairs(tabButtons) do
+        btn.MouseButton1Click:Connect(function()
+            for name, page in pairs(pages) do
+                page.Visible = false
+            end
+            pages[btn.Text].Visible = true
+        end)
+    end
+
+    return {
+        ScreenGui = screenGui,
+        BoxESPButton = boxESPEnabled,
+        HighlightButton = highlightEnabled,
+        AimbotButton = aimbotEnabled,
+    }
+end
+
+-- === Module BoxESP ===
+DebugSystem.BoxESP = {}
+DebugSystem.BoxESP.Enabled = false
+DebugSystem.BoxESP.Boxes = {}
+
+local function CreateBoxForPart(part)
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = Color3.fromRGB(0, 255, 0)
+    box.Thickness = 2
+    box.Filled = false
+    return box
+end
+
+function DebugSystem.BoxESP:Toggle(state)
+    self.Enabled = state
+    if not state then
+        for _, box in pairs(self.Boxes) do
+            box.Visible = false
+            box:Remove()
+        end
+        self.Boxes = {}
+    end
+end
+
+function DebugSystem.BoxESP:Update()
+    if not self.Enabled then return end
+
+    local camera = workspace.CurrentCamera
+    local players = Players:GetPlayers()
+
+    -- Remover boxes antigas invisíveis
+    for part, box in pairs(self.Boxes) do
+        if not part or not part.Parent then
+            box.Visible = false
+            box:Remove()
+            self.Boxes[part] = nil
+        end
+    end
+
+    for _, player in ipairs(players) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPart = player.Character.HumanoidRootPart
+            if rootPart then
+                local pos, onScreen = camera:WorldToViewportPoint(rootPart.Position)
+                if onScreen then
+                    local box = self.Boxes[rootPart]
+                    if not box then
+                        box = CreateBoxForPart(rootPart)
+                        self.Boxes[rootPart] = box
+                    end
+
+                    local size = 50 -- tamanho fixo para simplicidade
+                    box.Visible = true
+                    box.Transparency = 1 - pos.Z / 1000
+                    box.Size = size
+                    box.Position = Vector2.new(pos.X - size / 2, pos.Y - size / 2)
+                else
+                    if self.Boxes[rootPart] then
+                        self.Boxes[rootPart].Visible = false
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- === Module Highlight/Chams ===
+DebugSystem.HighlightChams = {}
+DebugSystem.HighlightChams.Enabled = false
+DebugSystem.HighlightChams.Highlights = {}
+
+function DebugSystem.HighlightChams:Toggle(state)
+    self.Enabled = state
+    if not state then
+        for _, highlight in pairs(self.Highlights) do
